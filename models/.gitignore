@@ -1,0 +1,2 @@
+# limo_person_following 模型文件（通过 download_model.sh 下载）
+limo_person_following/models/*.caffemodel

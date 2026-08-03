@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- ============================================ -->
+    <!-- LIMO Person Following - Main Launch File     -->
+    <!-- ============================================ -->
+
+    <!-- Arguments -->
+    <arg name="use_rviz" default="false" doc="Launch RViz for visualization"/>
+    <arg name="config_file" default="$(find limo_person_following)/config/person_following.yaml"
+         doc="Path to YAML configuration file"/>
+
+    <!-- Load all parameters from YAML -->
+    <rosparam command="load" file="$(arg config_file)"/>
+
+    <!-- ============================================ -->
+    <!-- Node 1: Person Detector                      -->
+    <!-- ============================================ -->
+    <node name="person_detector" pkg="limo_person_following"
+          type="detector_node.py" output="screen" respawn="true">
+        <!-- Override model paths with package-relative paths -->
+        <param name="detector/model_path"
+               value="$(find limo_person_following)/models/MobileNetSSD_deploy.caffemodel"/>
+        <param name="detector/config_path"
+               value="$(find limo_person_following)/models/MobileNetSSD_deploy.prototxt"/>
+    </node>
+
+    <!-- ============================================ -->
+    <!-- Node 2: Person Tracker                       -->
+    <!-- ============================================ -->
+    <node name="person_tracker" pkg="limo_person_following"
+          type="tracker_node.py" output="screen" respawn="true"/>
+
+    <!-- ============================================ -->
+    <!-- Node 3: Person Controller                    -->
+    <!-- ============================================ -->
+    <node name="person_controller" pkg="limo_person_following"
+          type="controller_node.py" output="screen" respawn="true"/>
+
+    <!-- ============================================ -->
+    <!-- Optional: RViz                              -->
+    <!-- ============================================ -->
+    <node if="$(arg use_rviz)" name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find limo_person_following)/config/person_following.rviz"/>
+</launch>

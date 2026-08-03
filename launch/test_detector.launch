@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- ============================================ -->
+    <!-- Test launch: Detector only + RViz            -->
+    <!-- ============================================ -->
+
+    <arg name="config_file" default="$(find limo_person_following)/config/person_following.yaml"/>
+
+    <rosparam command="load" file="$(arg config_file)"/>
+
+    <!-- Person Detector node only -->
+    <node name="person_detector" pkg="limo_person_following"
+          type="detector_node.py" output="screen" respawn="true">
+        <param name="detector/model_path"
+               value="$(find limo_person_following)/models/MobileNetSSD_deploy.caffemodel"/>
+        <param name="detector/config_path"
+               value="$(find limo_person_following)/models/MobileNetSSD_deploy.prototxt"/>
+        <param name="debug/publish_annotated_image" value="true"/>
+        <param name="debug/log_level" value="DEBUG"/>
+    </node>
+
+    <!-- RViz for visualization -->
+    <node name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find limo_person_following)/config/person_following.rviz"/>
+
+    <!-- Optional: image_view to see annotated detections -->
+    <node name="detection_view" pkg="image_view" type="image_view">
+        <remap from="image" to="/person_detections_image"/>
+    </node>
+</launch>

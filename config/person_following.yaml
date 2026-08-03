@@ -1,0 +1,61 @@
+# ============================================================
+# LIMO Person Following - Configuration
+# ============================================================
+
+# --- Detection ---
+detector:
+  model_path: "$(find limo_person_following)/models/MobileNetSSD_deploy.caffemodel"
+  config_path: "$(find limo_person_following)/models/MobileNetSSD_deploy.prototxt"
+  confidence_threshold: 0.5          # Minimum confidence for person class
+  person_class_id: 15                # COCO class ID for "person"
+  input_width: 300                   # DNN blob input dimensions
+  input_height: 300
+  detection_rate: 8.0                # Hz, target detection frequency
+  use_gpu: true                      # Use OpenCV DNN CUDA backend
+  depth_scale: 0.001                 # RealSense depth is mm -> m
+  depth_bbox_fraction: 0.3           # Center fraction of bbox for depth sampling
+  scale_factor: 0.007843             # 1/127.5 normalization factor
+  mean_values: [127.5, 127.5, 127.5] # Mean subtraction values
+
+# --- Tracking ---
+tracker:
+  iou_match_threshold: 0.3           # Minimum IoU for identity match
+  max_disappeared_frames: 15         # Frames before declaring lost (~1.9s at 8Hz)
+  reacquire_timeout: 3.0             # Seconds to try re-acquire before new target
+  initial_target_policy: "closest"   # "closest" or "largest_bbox"
+
+# --- Control ---
+controller:
+  target_distance: 1.2               # Desired following distance (meters)
+  min_distance: 0.6                  # STOP zone: too close (meters)
+  max_distance: 3.5                  # STOP zone: too far / lost (meters)
+  dead_zone_distance: 0.15           # Distance error dead band (meters)
+  dead_zone_angle: 0.08              # Angular error dead band (rad, ~4.6 deg)
+  kp_linear: 0.6                     # Linear P gain (m/s per m error)
+  kp_angular: 1.2                    # Angular P gain (rad/s per rad error)
+  max_linear_speed: 0.5              # Maximum forward speed (m/s)
+  max_angular_speed: 1.0             # Maximum turn speed (rad/s)
+  max_linear_accel: 0.3              # Linear acceleration limit (m/s^2)
+  max_angular_accel: 0.8             # Angular acceleration limit (rad/s^2)
+  back_up_speed: 0.15                # Speed when backing away (m/s)
+  angular_distance_factor: true      # Scale angular speed by distance
+  linear_angular_factor: true        # Reduce linear speed during turns
+  watchdog_timeout: 1.0              # Stop if no target message for N seconds
+  control_rate: 20.0                 # Hz, velocity command publishing rate
+  height_min: -1.5                   # Minimum plausible person height (m)
+  height_max: 2.0                    # Maximum plausible person height (m)
+
+# --- Camera ---
+camera:
+  rgb_topic: "/camera/color/image_raw"
+  depth_topic: "/camera/aligned_depth_to_color/image_raw"
+  camera_info_topic: "/camera/color/camera_info"
+  camera_frame: "camera_color_optical_frame"
+  sync_slop: 0.1                     # ApproximateTimeSynchronizer slop (sec)
+  image_transport: "raw"             # "raw" or "compressed"
+
+# --- Debug ---
+debug:
+  publish_annotated_image: true      # Publish image with bounding boxes
+  publish_markers: true              # Publish RViz markers
+  log_level: "INFO"                  # DEBUG, INFO, WARN, ERROR
